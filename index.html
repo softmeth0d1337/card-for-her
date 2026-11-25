@@ -3,17 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Для тебя</title>
+  <title>Для тебя ♥</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #fff8f5;
-      --bg-soft: #fdeee8;
-      --card: #ffffff;
-      --text: #2e2427;
-      --muted: #7a686d;
-      --accent: #e06d84;
-      --accent-dark: #c45269;
-      --border: #f2dcd6;
+      --bg-1: #fff6f8;
+      --bg-2: #fde8ee;
+      --card: rgba(255, 255, 255, 0.9);
+      --text: #3a262c;
+      --muted: #856670;
+      --accent: #ff5e84;
+      --accent-dark: #e03e66;
+      --border: #f7d2dc;
+      --shadow: 0 14px 35px rgba(224, 62, 102, 0.12);
     }
 
     * {
@@ -27,20 +31,47 @@
 
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
+      font-family: "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
       color: var(--text);
       min-height: 100dvh;
       overflow-x: hidden;
     }
 
+    /* Блокируем скролл и скрываем весь низ до открытия конверта */
     body.locked {
       overflow: hidden;
       height: 100dvh;
     }
 
-    /* Стартовый экран: только конверт по центру */
-    .intro-stage {
+    /* Фоновые плавающие сердечки */
+    .floating-hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .floating-hearts span {
+      position: absolute;
+      bottom: -30px;
+      color: rgba(255, 94, 132, 0.25);
+      animation: floatUp linear infinite;
+      user-select: none;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* Стартовый экран — ТОЛЬКО конверт по центру, без спойлеров снизу */
+    .hero-envelope {
+      position: relative;
+      z-index: 2;
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
@@ -48,65 +79,73 @@
       justify-content: center;
       padding: 24px;
       text-align: center;
-      transition: min-height 0.5s ease, padding 0.5s ease;
+      transition: min-height 0.6s ease, padding 0.6s ease;
     }
 
-    body.opened .intro-stage {
+    body.opened .hero-envelope {
       min-height: auto;
-      padding-top: 40px;
-      padding-bottom: 16px;
+      padding-top: 48px;
+      padding-bottom: 10px;
     }
 
-    .envelope-btn {
+    .envelope-wrapper {
       position: relative;
-      width: 250px;
-      height: 165px;
-      border: none;
-      background: transparent;
-      padding: 0;
+      width: 280px;
+      height: 185px;
       cursor: pointer;
-      display: grid;
-      place-items: center;
+      perspective: 1000px;
+      transition: transform 0.3s ease;
     }
 
-    .envelope-back {
+    .envelope-wrapper:active {
+      transform: scale(0.97);
+    }
+
+    .env-back {
       position: absolute;
       inset: 0;
-      background: #f6c6cf;
-      border-radius: 14px;
-      border: 1px solid #eab0bc;
-      box-shadow: 0 14px 32px rgba(196, 82, 105, 0.16);
+      background: #ffccd8;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid #f5b3c4;
     }
 
-    .letter-sheet {
-      position: relative;
-      z-index: 2;
-      width: 86%;
-      height: 78%;
-      background: #fff;
-      border-radius: 10px;
-      border: 1px solid var(--border);
+    .env-letter {
+      position: absolute;
+      left: 7%;
+      right: 7%;
+      bottom: 8%;
+      height: 82%;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-weight: 600;
-      color: var(--accent-dark);
-      transform: translateY(6px);
-      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      z-index: 2;
+      transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    .envelope-front {
+    .env-letter-title {
+      font-family: "Caveat", cursive;
+      font-size: 28px;
+      color: var(--accent-dark);
+      line-height: 1.1;
+    }
+
+    .env-front {
       position: absolute;
       inset: 0;
       z-index: 3;
       pointer-events: none;
-      border-radius: 14px;
-      background: linear-gradient(155deg, #f9d5dc 0%, #f1b6c3 100%);
+      border-radius: 16px;
+      background: linear-gradient(155deg, #ffd8e2 0%, #ffb7c9 100%);
       clip-path: polygon(0 38%, 50% 68%, 100% 38%, 100% 100%, 0 100%);
     }
 
-    .envelope-flap {
+    .env-flap {
       position: absolute;
       top: 0;
       left: 0;
@@ -115,271 +154,655 @@
       z-index: 4;
       pointer-events: none;
       transform-origin: top center;
-      background: linear-gradient(180deg, #fbdde3 0%, #f4beCA 100%);
+      background: linear-gradient(180deg, #ffe2ea 0%, #ffc2d1 100%);
       clip-path: polygon(0 0, 100% 0, 50% 100%);
-      transition: transform 0.5s ease, z-index 0.5s ease;
+      transition: transform 0.55s ease, z-index 0.55s ease;
     }
 
-    .seal {
+    .env-seal {
       position: absolute;
-      z-index: 5;
-      top: 46%;
-      width: 42px;
-      height: 42px;
+      top: 47%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       background: var(--accent);
       color: #fff;
+      font-size: 20px;
       display: grid;
       place-items: center;
-      font-size: 18px;
-      box-shadow: 0 6px 14px rgba(224, 109, 132, 0.35);
+      z-index: 5;
+      box-shadow: 0 6px 18px rgba(255, 94, 132, 0.45);
+      animation: pulse 1.8s infinite;
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    .envelope-btn.is-open .envelope-flap {
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.08); }
+    }
+
+    .envelope-wrapper.open .env-flap {
       transform: rotateX(180deg);
       z-index: 1;
     }
 
-    .envelope-btn.is-open .seal {
+    .envelope-wrapper.open .env-seal {
       opacity: 0;
-      transform: scale(0.5);
+      transform: translate(-50%, -50%) scale(0.4);
+      animation: none;
     }
 
-    .envelope-btn.is-open .letter-sheet {
-      transform: translateY(-54px);
+    .envelope-wrapper.open .env-letter {
+      transform: translateY(-68px);
       z-index: 3;
     }
 
-    .tap-hint {
-      margin-top: 18px;
+    .open-hint {
+      margin-top: 22px;
       font-size: 14px;
+      font-weight: 500;
       color: var(--muted);
-      transition: opacity 0.35s ease;
+      transition: opacity 0.3s ease;
     }
 
-    body.opened .tap-hint {
+    body.opened .open-hint {
       opacity: 0;
-      pointer-events: none;
       height: 0;
       margin: 0;
       overflow: hidden;
     }
 
-    /* Контент ниже — скрыт до открытия конверта */
-    .after-open {
+    /* Все блоки ниже скрыты, пока конверт не открыт */
+    .main-blocks {
       display: none;
-      max-width: 680px;
+      position: relative;
+      z-index: 2;
+      max-width: 720px;
       margin: 0 auto;
-      padding: 12px 18px 64px;
+      padding: 16px 18px 90px;
       opacity: 0;
-      transform: translateY(18px);
-      transition: opacity 0.55s ease, transform 0.55s ease;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
     }
 
-    body.opened .after-open {
+    body.opened .main-blocks {
       display: block;
     }
 
-    body.opened.revealed .after-open {
+    body.opened.visible .main-blocks {
       opacity: 1;
       transform: translateY(0);
     }
 
-    .block {
+    .card {
       background: var(--card);
+      backdrop-filter: blur(10px);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 22px;
-      margin-top: 18px;
-      box-shadow: 0 8px 24px rgba(46, 36, 39, 0.05);
+      border-radius: 24px;
+      padding: 26px 22px;
+      margin-top: 22px;
+      box-shadow: var(--shadow);
     }
 
-    h1, h2 {
-      margin: 0 0 10px;
-      font-weight: 700;
-      line-height: 1.25;
-    }
-
-    h1 {
-      font-size: 24px;
-    }
-
-    h2 {
-      font-size: 19px;
-    }
-
-    p {
+    .section-title {
+      font-family: "Caveat", cursive;
+      font-size: 34px;
+      color: var(--accent-dark);
       margin: 0 0 12px;
-      line-height: 1.6;
-      color: var(--text);
+      text-align: center;
     }
 
-    .muted {
-      color: var(--muted);
-      font-size: 14px;
+    .typewriter-text {
+      font-size: 15.5px;
+      line-height: 1.75;
+      white-space: pre-line;
+      min-height: 120px;
     }
 
-    /* Блок с фотками */
-    .photo-grid {
+    /* Таймер отношений */
+    .timer-grid {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
       margin-top: 14px;
     }
 
-    @media (min-width: 560px) {
-      .photo-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .timer-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 6px;
+      text-align: center;
+    }
+
+    .timer-num {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent-dark);
+    }
+
+    .timer-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+
+    /* 3D Полароиды */
+    .polaroid-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      margin-top: 14px;
+    }
+
+    @media (min-width: 600px) {
+      .polaroid-grid {
+        grid-template-columns: repeat(3, 1fr);
       }
     }
 
-    .photo-card {
-      background: #fffdfb;
+    .polaroid {
+      height: 290px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .polaroid-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+      transform-style: preserve-3d;
+    }
+
+    .polaroid.flipped .polaroid-inner {
+      transform: rotateY(180deg);
+    }
+
+    .polaroid-front, .polaroid-back {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      background: #fff;
+      border-radius: 16px;
+      padding: 10px 10px 16px;
       border: 1px solid var(--border);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .polaroid-front img {
+      width: 100%;
+      height: 215px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .polaroid-cap {
+      margin-top: auto;
+      padding-top: 8px;
+      text-align: center;
+      font-family: "Caveat", cursive;
+      font-size: 22px;
+      color: var(--text);
+    }
+
+    .polaroid-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(145deg, #fff5f8, #ffe5ec);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .polaroid-back p {
+      font-size: 14.5px;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .tap-note {
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    /* Скретч-карта */
+    .scratch-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 340px;
+      height: 120px;
+      margin: 14px auto 0;
       border-radius: 16px;
       overflow: hidden;
+      border: 2px dashed var(--accent);
+      background: #fff;
+      display: grid;
+      place-items: center;
+      padding: 14px;
+      text-align: center;
     }
 
-    .photo-card img {
-      display: block;
+    .scratch-secret {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--accent-dark);
+      user-select: none;
+    }
+
+    #scratchCanvas {
+      position: absolute;
+      inset: 0;
       width: 100%;
-      height: 240px;
-      object-fit: cover;
+      height: 100%;
+      touch-action: none;
+      cursor: grab;
     }
 
-    .photo-caption {
-      padding: 12px 14px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    .actions {
+    /* Кликабельные теги */
+    .tags-wrap {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 14px;
-      position: relative;
-      min-height: 52px;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 18px;
     }
 
-    .btn {
+    .tag-chip {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tag-chip.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .tag-output {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 14.5px;
+      color: var(--accent-dark);
+      font-weight: 500;
+      min-height: 24px;
+    }
+
+    /* Финальный вопрос */
+    .final-btns {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-top: 16px;
+      min-height: 56px;
+      position: relative;
+    }
+
+    .btn-yes, .btn-no {
       border: none;
-      border-radius: 12px;
-      padding: 12px 20px;
-      font-size: 15px;
+      border-radius: 14px;
+      padding: 13px 26px;
+      font-size: 16px;
       font-weight: 600;
       cursor: pointer;
+      font-family: inherit;
     }
 
     .btn-yes {
       background: var(--accent);
       color: #fff;
+      box-shadow: 0 8px 20px rgba(255, 94, 132, 0.35);
     }
 
     .btn-no {
-      background: #f3e6e9;
+      background: #f2dce2;
       color: var(--text);
       transition: transform 0.2s ease;
     }
 
-    .answer-box {
+    .final-msg {
       margin-top: 14px;
+      text-align: center;
       font-weight: 600;
       color: var(--accent-dark);
-      min-height: 22px;
+    }
+
+    /* Кнопка музыки в углу */
+    .music-btn {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 20;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      color: var(--accent-dark);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
     }
   </style>
 </head>
 <body class="locked">
-  <!-- Экран 1: только конверт -->
-  <section class="intro-stage" id="top">
-    <button class="envelope-btn" id="envelopeBtn" type="button" aria-label="Открыть конверт">
-      <span class="envelope-back"></span>
-      <span class="letter-sheet">Письмо для тебя</span>
-      <span class="envelope-front"></span>
-      <span class="envelope-flap"></span>
-      <span class="seal">♥</span>
-    </button>
-    <div class="tap-hint" id="tapHint">Нажми на конверт</div>
+  <div class="floating-hearts" id="heartsBg"></div>
+
+  <!-- 1. ТОЛЬКО КОНВЕРТ НА СТАРТЕ -->
+  <section class="hero-envelope">
+    <div class="envelope-wrapper" id="envelope">
+      <div class="env-back"></div>
+      <div class="env-letter">
+        <div class="env-letter-title">Для тебя ♥</div>
+      </div>
+      <div class="env-front"></div>
+      <div class="env-flap"></div>
+      <div class="env-seal">♥</div>
+    </div>
+    <div class="open-hint">Нажми на конверт, чтобы открыть</div>
   </section>
 
-  <!-- Всё остальное появляется и открывается для скролла только после нажатия на конверт -->
-  <main class="after-open" id="content">
-    <section class="block">
-      <!-- ✏️ ЗАМЕНИ ЗАГОЛОВОК И ТЕКСТ ПИСЬМА -->
-      <h1>Привет!</h1>
-      <p>
-        Здесь напиши своё письмо — всё, что хочешь сказать. Когда она откроет конверт,
-        письмо вылетит, а дальше можно просто листать страницу вниз.
-      </p>
-      <p class="muted">Листай ниже, там дальше фотки.</p>
+  <!-- 2. ВСЕ ОСТАЛЬНЫЕ БЛОКИ (ПОЯВЛЯЮТСЯ ПОСЛЕ КЛИКА ПО КОНВЕРТУ) -->
+  <main class="main-blocks" id="mainBlocks">
+    <!-- Письмо -->
+    <section class="card">
+      <h2 class="section-title">Моё письмо тебе</h2>
+      <div class="typewriter-text" id="letterText"></div>
     </section>
 
-    <section class="block">
-      <h2>Наши фотки</h2>
-      <p class="muted">
-        <!-- ✏️ Закинь свои фото в репозиторий (например photo1.jpg, photo2.jpg) и укажи их имена в src -->
-        Замени ссылки на свои фотографии и подпиши каждый момент.
-      </p>
-
-      <div class="photo-grid">
-        <article class="photo-card">
-          <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800&q=80" alt="Фото 1" />
-          <div class="photo-caption">✏️ Подпись к первому фото</div>
-        </article>
-
-        <article class="photo-card">
-          <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80" alt="Фото 2" />
-          <div class="photo-caption">✏️ Подпись ко второму фото</div>
-        </article>
+    <!-- Таймер -->
+    <section class="card">
+      <h2 class="section-title">Сколько мы уже знакомы</h2>
+      <div class="timer-grid">
+        <div class="timer-box">
+          <div class="timer-num" id="tDays">0</div>
+          <div class="timer-label">Дней</div>
+        </div>
+        <div class="timer-box">
+          <div class="timer-num" id="tHours">0</div>
+          <div class="timer-label">Часов</div>
+        </div>
+        <div class="timer-box">
+          <div class="timer-num" id="tMins">0</div>
+          <div class="timer-label">Минут</div>
+        </div>
+        <div class="timer-box">
+          <div class="timer-num" id="tSecs">0</div>
+          <div class="timer-label">Секунд</div>
+        </div>
       </div>
     </section>
 
-    <section class="block">
-      <h2>✏️ Финальный вопрос</h2>
-      <div class="actions" id="btnArea">
-        <button class="btn btn-yes" id="yesBtn" type="button">Да</button>
-        <button class="btn btn-no" id="noBtn" type="button">Нет</button>
+    <!-- Фотки 3D-полароиды -->
+    <section class="card">
+      <h2 class="section-title">Наши моменты</h2>
+      <div class="tap-note">Нажми на любую фотку, чтобы перевернуть</div>
+      <div class="polaroid-grid">
+        <!-- ✏️ ЗАМЕНИ ФОТКИ И ПОДПИСИ -->
+        <div class="polaroid" onclick="this.classList.toggle('flipped')">
+          <div class="polaroid-inner">
+            <div class="polaroid-front">
+              <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=700&q=80" alt="Фото 1" />
+              <div class="polaroid-cap">Тот самый день</div>
+            </div>
+            <div class="polaroid-back">
+              <p>✏️ Напиши сюда секретную подпись на обороте первой фотки</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="polaroid" onclick="this.classList.toggle('flipped')">
+          <div class="polaroid-inner">
+            <div class="polaroid-front">
+              <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=700&q=80" alt="Фото 2" />
+              <div class="polaroid-cap">Лучший вайб</div>
+            </div>
+            <div class="polaroid-back">
+              <p>✏️ Напиши сюда воспоминание ко второй фотке</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="polaroid" onclick="this.classList.toggle('flipped')">
+          <div class="polaroid-inner">
+            <div class="polaroid-front">
+              <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=700&q=80" alt="Фото 3" />
+              <div class="polaroid-cap">Только мы</div>
+            </div>
+            <div class="polaroid-back">
+              <p>✏️ А здесь — подпись к третьей фотке</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="answer-box" id="answerBox"></div>
+    </section>
+
+    <!-- Секретный блок -->
+    <section class="card">
+      <h2 class="section-title">Секретный блок</h2>
+      <div class="tap-note">Сотри защитный слой пальцем или мышкой</div>
+      <div class="scratch-wrap" id="scratchWrap">
+        <!-- ✏️ СЕКРЕТНАЯ ФРАЗА ПОД СКРЕТЧ-СЛОЕМ -->
+        <div class="scratch-secret">Ты самое лучшее, что со мной случилось ♥</div>
+        <canvas id="scratchCanvas"></canvas>
+      </div>
+
+      <div class="tags-wrap">
+        <button class="tag-chip" data-msg="Обожаю твою улыбку, она реально спасает любой день.">Когда ты улыбаешься</button>
+        <button class="tag-chip" data-msg="С тобой даже просто молчать или залипать в тикток — уже кайф.">Наш вайб</button>
+        <button class="tag-chip" data-msg="Каждый раз жду нашу следующую встречу.">Когда мы гуляем</button>
+      </div>
+      <div class="tag-output" id="tagOutput"></div>
+    </section>
+
+    <!-- Финал -->
+    <section class="card">
+      <h2 class="section-title">Ты меня любишь?</h2>
+      <div class="final-btns">
+        <button class="btn-yes" id="yesBtn">Да ♥</button>
+        <button class="btn-no" id="noBtn">Нет</button>
+      </div>
+      <div class="final-msg" id="finalMsg"></div>
     </section>
   </main>
 
+  <!-- Музыкальный плеер -->
+  <button class="music-btn" id="musicBtn">♪ Включить музыку</button>
+
   <script>
-    const envelopeBtn = document.getElementById("envelopeBtn");
-    const yesBtn = document.getElementById("yesBtn");
-    const noBtn = document.getElementById("noBtn");
-    const answerBox = document.getElementById("answerBox");
-    let openedOnce = false;
+    // ✏️ 1. ДАТА НАЧАЛА (Год, Месяц - 1, День, Час, Минута)
+    const START_DATE = new Date(2025, 8, 1, 18, 0, 0);
 
-    envelopeBtn.addEventListener("click", () => {
-      if (openedOnce) return;
-      openedOnce = true;
+    // ✏️ 2. ТЕКСТ ПИСЬМА (печатается по буквам после открытия конверта)
+    const FULL_LETTER = `Привет!\n\nЯ решил не кидать тебе обычную открытку, а сделать для тебя свой маленький сайт.\n\nСпасибо тебе за все наши моменты, шутки и за то, что ты просто рядом. Листай ниже — я собрал тут кое-что для тебя ♥`;
 
-      envelopeBtn.classList.add("is-open");
+    // Плавающие сердечки на фоне
+    const heartsBg = document.getElementById("heartsBg");
+    for (let i = 0; i < 16; i++) {
+      const s = document.createElement("span");
+      s.textContent = "♥";
+      s.style.left = Math.random() * 100 + "vw";
+      s.style.fontSize = 14 + Math.random() * 18 + "px";
+      s.style.animationDuration = 7 + Math.random() * 8 + "s";
+      s.style.animationDelay = Math.random() * 5 + "s";
+      heartsBg.appendChild(s);
+    }
+
+    // Логика открытия конверта и появления всех блоков
+    const envelope = document.getElementById("envelope");
+    const letterText = document.getElementById("letterText");
+    let isOpened = false;
+
+    function typeWriter(text, el, idx = 0) {
+      if (idx <= text.length) {
+        el.textContent = text.slice(0, idx);
+        setTimeout(() => typeWriter(text, el, idx + 1), 28);
+      }
+    }
+
+    envelope.addEventListener("click", () => {
+      if (isOpened) return;
+      isOpened = true;
+
+      envelope.classList.add("open");
       document.body.classList.add("opened");
 
       setTimeout(() => {
         document.body.classList.remove("locked");
-        document.body.classList.add("revealed");
-      }, 450);
+        document.body.classList.add("visible");
+        initScratchCard();
+        typeWriter(FULL_LETTER, letterText);
+      }, 550);
     });
 
-    yesBtn.addEventListener("click", () => {
-      answerBox.textContent = "✏️ Твой ответ при нажатии на Да";
-    });
+    // Таймер
+    function updateTimer() {
+      const diff = Math.max(0, Date.now() - START_DATE.getTime());
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff / 3600000) % 24);
+      const mins = Math.floor((diff / 60000) % 60);
+      const secs = Math.floor((diff / 1000) % 60);
 
-    function moveNoButton(e) {
-      if (e) e.preventDefault();
-      const dx = (Math.random() * 140 - 70).toFixed(0);
-      const dy = (Math.random() * 70 - 35).toFixed(0);
-      noBtn.style.transform = `translate(${dx}px, ${dy}px)`;
+      document.getElementById("tDays").textContent = days;
+      document.getElementById("tHours").textContent = hours;
+      document.getElementById("tMins").textContent = mins;
+      document.getElementById("tSecs").textContent = secs;
+    }
+    setInterval(updateTimer, 1000);
+    updateTimer();
+
+    // Скретч-карта
+    function initScratchCard() {
+      const wrap = document.getElementById("scratchWrap");
+      const canvas = document.getElementById("scratchCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = wrap.offsetWidth;
+      canvas.height = wrap.offsetHeight;
+
+      ctx.fillStyle = "#f4b8c8";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "600 14px Montserrat, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Сотри меня ♥", canvas.width / 2, canvas.height / 2 + 5);
+
+      let drawing = false;
+      function scratch(e) {
+        if (!drawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.beginPath();
+        ctx.arc(x, y, 22, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      canvas.addEventListener("pointerdown", (e) => { drawing = true; scratch(e); });
+      window.addEventListener("pointerup", () => { drawing = false; });
+      canvas.addEventListener("pointermove", scratch);
+      canvas.addEventListener("touchstart", (e) => { drawing = true; scratch(e); }, { passive: true });
+      canvas.addEventListener("touchmove", scratch, { passive: true });
     }
 
-    noBtn.addEventListener("pointerenter", moveNoButton);
-    noBtn.addEventListener("touchstart", moveNoButton, { passive: false });
-    noBtn.addEventListener("click", moveNoButton);
+    // Кликабельные теги
+    const tagOutput = document.getElementById("tagOutput");
+    document.querySelectorAll(".tag-chip").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tag-chip").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        tagOutput.textContent = btn.dataset.msg;
+      });
+    });
+
+    // Финал: Да и убегающая Нет
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const finalMsg = document.getElementById("finalMsg");
+
+    yesBtn.addEventListener("click", () => {
+      finalMsg.textContent = "Я так и знал! Люблю тебя ♥";
+      for (let i = 0; i < 30; i++) {
+        const c = document.createElement("div");
+        c.textContent = ["♥", "✨", "🌸"][i % 3];
+        c.style.position = "fixed";
+        c.style.left = Math.random() * 100 + "vw";
+        c.style.top = "-20px";
+        c.style.fontSize = 18 + Math.random() * 14 + "px";
+        c.style.zIndex = 99;
+        c.style.pointerEvents = "none";
+        c.style.transition = "transform 2.2s linear, opacity 2.2s ease";
+        document.body.appendChild(c);
+        requestAnimationFrame(() => {
+          c.style.transform = `translateY(105vh) rotate(${Math.random() * 360}deg)`;
+          c.style.opacity = "0";
+        });
+        setTimeout(() => c.remove(), 2300);
+      }
+    });
+
+    function runAway(e) {
+      if (e) e.preventDefault();
+      const x = (Math.random() * 160 - 80).toFixed(0);
+      const y = (Math.random() * 90 - 45).toFixed(0);
+      noBtn.style.transform = `translate(${x}px, ${y}px)`;
+    }
+    noBtn.addEventListener("pointerenter", runAway);
+    noBtn.addEventListener("touchstart", runAway, { passive: false });
+    noBtn.addEventListener("click", runAway);
+
+    // Встроенный нежный синт-плеер (работает без внешних mp3 файлов)
+    const musicBtn = document.getElementById("musicBtn");
+    let audioCtx = null;
+    let musicTimer = null;
+    let playing = false;
+
+    musicBtn.addEventListener("click", () => {
+      if (!playing) {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const notes = [261.63, 329.63, 392.0, 493.88, 392.0, 329.63];
+        let step = 0;
+        musicTimer = setInterval(() => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.value = notes[step % notes.length];
+          gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.9);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.95);
+          step++;
+        }, 650);
+        playing = true;
+        musicBtn.textContent = "❚❚ Пауза";
+      } else {
+        clearInterval(musicTimer);
+        playing = false;
+        musicBtn.textContent = "♪ Включить музыку";
+      }
+    });
   </script>
 </body>
 </html>
