@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Для тебя ✨</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Эстетичные шрифты: Playfair Display, Plus Jakarta Sans и Caveat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Конфетти -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* Базовая пастельно-кремовая палитра (как в 1-й версии) */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #fffaf7 0%, #fff1f2 45%, #ffe4e6 100%);
+            color: #4a2532;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .serif-title {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .handwritten {
+            font-family: 'Caveat', cursive;
+        }
+
+        /* Мягкие бумажно-стеклянные карточки */
+        .soft-card {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(251, 113, 133, 0.22);
+            box-shadow: 0 18px 40px -15px rgba(225, 29, 72, 0.12);
+        }
+
+        /* Летающие пастельные частицы на фоне */
+        @keyframes floatSoft {
+            0% { transform: translateY(105vh) rotate(0deg) scale(0.7); opacity: 0; }
+            20% { opacity: 0.55; }
+            80% { opacity: 0.55; }
+            100% { transform: translateY(-10vh) rotate(360deg) scale(1.1); opacity: 0; }
+        }
+
+        .ambient-particle {
+            position: fixed;
+            bottom: -40px;
+            pointer-events: none;
+            z-index: 1;
+            animation: floatSoft linear infinite;
+        }
+
+        /* Мягкий шлейф за курсором / пальцем */
+        .cursor-sparkle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            font-size: 14px;
+            animation: sparkleRise 0.9s ease-out forwards;
+        }
+
+        @keyframes sparkleRise {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+            100% { transform: translate(-50%, -70px) scale(0.3); opacity: 0; }
+        }
+
+        /* =========================================================
+           1. ТАКТИЛЬНЫЙ ПАСТЕЛЬНЫЙ КОНВЕРТ
+        ========================================================= */
+        .envelope-stage {
+            perspective: 1100px;
+        }
+
+        .envelope-body {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            background: linear-gradient(145deg, #fecdd3, #fda4af);
+            border-radius: 18px;
+            box-shadow: 0 22px 45px -12px rgba(225, 29, 72, 0.28);
+            transition: transform 0.6s ease;
+        }
+
+        @media (min-width: 640px) {
+            .envelope-body { width: 380px; height: 245px; }
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0; left: 0;
+            width: 0; height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 118px solid #fb7185;
+            transform-origin: top;
+            transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+            border-radius: 18px 18px 0 0;
+        }
+
+        @media (min-width: 640px) {
+            .envelope-flap {
+                border-left: 190px solid transparent;
+                border-right: 190px solid transparent;
+                border-top: 140px solid #fb7185;
+            }
+        }
+
+        .envelope-body.opened .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .envelope-pocket {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 0; height: 0;
+            border-left: 150px solid #ffe4e6;
+            border-right: 150px solid #fecdd3;
+            border-bottom: 108px solid #fda4af;
+            border-top: 92px solid transparent;
+            border-radius: 0 0 18px 18px;
+            z-index: 2;
+        }
+
+        @media (min-width: 640px) {
+            .envelope-pocket {
+                border-left: 190px solid #ffe4e6;
+                border-right: 190px solid #fecdd3;
+                border-bottom: 130px solid #fda4af;
+                border-top: 115px solid transparent;
+            }
+        }
+
+        .wax-seal {
+            position: absolute;
+            top: 52%; left: 50%;
+            transform: translate(-50%, -45%);
+            width: 62px; height: 62px;
+            background: radial-gradient(circle at 30% 30%, #f43f5e, #be123c);
+            border: 3px solid rgba(255, 255, 255, 0.55);
+            border-radius: 50%;
+            box-shadow: 0 8px 20px rgba(190, 18, 60, 0.35);
+            z-index: 4;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .wax-seal:hover {
+            transform: translate(-50%, -45%) scale(1.1);
+            box-shadow: 0 12px 26px rgba(190, 18, 60, 0.45);
+        }
+
+        /* =========================================================
+           3. ПОЛАРОИДЫ С 3D-ПЕРЕВОРОТОМ
+        ========================================================= */
+        .polaroid-flip {
+            perspective: 1000px;
+            height: 350px;
+            cursor: pointer;
+            transition: transform 0.35s ease;
+        }
+
+        .polaroid-flip:hover {
+            transform: translateY(-6px) rotate(0deg) !important;
+            z-index: 10;
+        }
+
+        .polaroid-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .polaroid-flip.flipped .polaroid-inner {
+            transform: rotateY(180deg);
+        }
+
+        .polaroid-front, .polaroid-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            box-shadow: 0 14px 30px -10px rgba(136, 19, 55, 0.16);
+        }
+
+        .polaroid-front {
+            background: #ffffff;
+            padding: 12px 12px 46px 12px;
+            border: 1px solid #ffe4e6;
+        }
+
+        .polaroid-back {
+            background: linear-gradient(145deg, #fff1f2, #ffe4e6);
+            border: 2px solid #fecdd3;
+            transform: rotateY(180deg);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        /* =========================================================
+           4. СКРЕТЧ-КАРТА (СТИРАШКА)
+        ========================================================= */
+        .scratch-wrapper {
+            position: relative;
+            width: 100%;
+            height: 130px;
+            border-radius: 18px;
+            overflow: hidden;
+            user-select: none;
+            border: 2px dashed #fda4af;
+            background: #fff1f2;
+        }
+
+        #scratch-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            touch-action: none;
+            z-index: 2;
+            transition: opacity 0.6s ease;
+        }
+
+        /* Плавное появление блоков при скролле */
+        .reveal-block {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.75s ease, transform 0.75s ease;
+        }
+
+        .reveal-block.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="relative selection:bg-rose-200 selection:text-rose-900">
+
+    <!-- Фоновые плавающие частицы -->
+    <div id="ambient-bg" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
+
+    <!-- Кнопка фоновой lo-fi мелодии в правом нижнем углу -->
+    <div class="fixed bottom-4 right-4 z-50">
+        <button id="music-btn" class="soft-card px-4 py-2.5 rounded-full flex items-center gap-2 text-xs sm:text-sm font-semibold text-rose-700 hover:bg-white transition-all cursor-pointer">
+            <span id="music-icon" class="text-base">🔇</span>
+            <span id="music-text" class="hidden sm:inline">Включить вайб</span>
+        </button>
+        <!-- ✏️ ХОЧЕШЬ СВОЙ ТРЕК? Раскомментируй строку ниже и закинь song.mp3 в папку на GitHub -->
+        <!-- <audio id="custom-track" src="song.mp3" loop></audio> -->
+    </div>
+
+
+    <!-- =====================================================================
+         ОСНОВНОЙ ВЕРТИКАЛЬНЫЙ СКРОЛЛ С БЛОКАМИ
+    ====================================================================== -->
+    <main class="relative z-10 max-w-4xl mx-auto px-4 py-10 sm:py-16 space-y-16 sm:space-y-24">
+
+        <!-- =================================================================
+             БЛОК 1: ГЛАВНЫЙ ЭКРАН И ИНТЕРАКТИВНЫЙ КОНВЕРТ
+        ================================================================== -->
+        <section class="text-center space-y-8">
+            <div class="space-y-3">
+                <span class="inline-block px-4 py-1.5 rounded-full bg-rose-100/90 border border-rose-200 text-rose-600 text-xs font-semibold tracking-wide">
+                    ✨ Сделано специально для тебя
+                </span>
+                <!-- ✏️ ИЗМЕНИ ГЛАВНЫЙ ЗАГОЛОВОК И ПОДЗАГОЛОВОК -->
+                <h1 class="serif-title text-4xl sm:text-6xl font-bold text-rose-950 leading-tight">
+                    Маленький уголок<br><span class="italic text-rose-500">наших моментов</span>
+                </h1>
+                <p class="text-sm sm:text-base text-rose-800/75 max-w-md mx-auto">
+                    Листай вниз — я собрал здесь кое-что особенное, чтобы ты улыбнулась ❤️
+                </p>
+            </div>
+
+            <!-- Конверт с восковой печатью -->
+            <div id="envelope-area" class="envelope-stage flex flex-col items-center justify-center pt-2">
+                <div id="envelope" class="envelope-body">
+                    <div class="envelope-flap"></div>
+                    <div class="envelope-pocket"></div>
+                    <button id="open-envelope-btn" aria-label="Открыть конверт" class="wax-seal">
+                        <span class="text-white text-2xl">❤️</span>
+                    </button>
+                </div>
+                <p class="mt-5 text-xs sm:text-sm font-medium text-rose-600/80 animate-pulse">
+                    Нажми на печать, чтобы открыть письмо 👆
+                </p>
+            </div>
+
+            <!-- Карточка с письмом (плавно появляется при открытии конверта) -->
+            <div id="letter-card" class="hidden soft-card rounded-3xl p-6 sm:p-10 text-left max-w-2xl mx-auto transition-all duration-500">
+                <div class="flex items-center justify-between border-b border-rose-100 pb-4 mb-5">
+                    <h2 class="handwritten text-3xl sm:text-4xl font-bold text-rose-600">
+                        Моё послание тебе...
+                    </h2>
+                    <span class="text-2xl">💌</span>
+                </div>
+
+                <!-- Сюда печатается текст -->
+                <div id="typewriter-box" class="text-rose-950/90 text-base sm:text-lg leading-relaxed whitespace-pre-line min-h-[130px]"></div>
+
+                <div class="mt-7 text-right">
+                    <!-- ✏️ ИЗМЕНИ ПОДПИСЬ В КОНЦЕ ПИСЬМА -->
+                    <p class="handwritten text-3xl font-bold text-rose-500">
+                        Твой Егорчик ❤️
+                    </p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================================
+             БЛОК 2: ЖИВОЙ ТАЙМЕР ОТНОШЕНИЙ
+        ================================================================== -->
+        <section class="reveal-block soft-card rounded-3xl p-6 sm:p-10 text-center">
+            <h2 class="serif-title text-2xl sm:text-4xl font-bold text-rose-950 mb-2">
+                Сколько мы уже на одной волне
+            </h2>
+            <p class="text-xs sm:text-sm text-rose-700/75 mb-7">
+                Каждая секунда с тобой — в копилку лучших воспоминаний ✨
+            </p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5 max-w-2xl mx-auto">
+                <div class="bg-white/90 rounded-2xl p-4 sm:p-5 border border-rose-100 shadow-sm">
+                    <div id="days" class="serif-title text-3xl sm:text-4xl font-bold text-rose-500">0</div>
+                    <div class="text-xs font-semibold uppercase tracking-wider text-rose-400 mt-1">Дней</div>
+                </div>
+                <div class="bg-white/90 rounded-2xl p-4 sm:p-5 border border-rose-100 shadow-sm">
+                    <div id="hours" class="serif-title text-3xl sm:text-4xl font-bold text-rose-500">0</div>
+                    <div class="text-xs font-semibold uppercase tracking-wider text-rose-400 mt-1">Часов</div>
+                </div>
+                <div class="bg-white/90 rounded-2xl p-4 sm:p-5 border border-rose-100 shadow-sm">
+                    <div id="minutes" class="serif-title text-3xl sm:text-4xl font-bold text-rose-500">0</div>
+                    <div class="text-xs font-semibold uppercase tracking-wider text-rose-400 mt-1">Минут</div>
+                </div>
+                <div class="bg-white/90 rounded-2xl p-4 sm:p-5 border border-rose-100 shadow-sm">
+                    <div id="seconds" class="serif-title text-3xl sm:text-4xl font-bold text-rose-500">0</div>
+                    <div class="text-xs font-semibold uppercase tracking-wider text-rose-400 mt-1">Секунд</div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================================
+             БЛОК 3: ИНТЕРАКТИВНЫЕ ПОЛАРОИДЫ (ПЕРЕВОРАЧИВАЮТСЯ ПО КЛИКУ)
+        ================================================================== -->
+        <section class="reveal-block space-y-8">
+            <div class="text-center">
+                <h2 class="serif-title text-3xl sm:text-4xl font-bold text-rose-950 mb-2">
+                    Наши кадры 📸
+                </h2>
+                <p class="text-xs sm:text-sm text-rose-700/75">
+                    Нажми на любую фотку — на обратной стороне спрятана заметка
+                </p>
+            </div>
+
+            <!-- ✏️ ЗАМЕНИ ССЫЛКИ В src="..." НА СВОИ ФОТКИ (например, "photo1.jpg") И ТЕКСТ НА ОБОРОТЕ -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-7">
+                
+                <!-- Полароид 1 -->
+                <div class="polaroid-flip sm:-rotate-2" onclick="this.classList.toggle('flipped')">
+                    <div class="polaroid-inner">
+                        <div class="polaroid-front">
+                            <div class="w-full h-64 rounded-xl overflow-hidden bg-rose-50">
+                                <img src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=600&q=80"
+                                     onerror="this.src='https://placehold.co/600x600/ffe4e6/be123c?text=Фото+1'"
+                                     alt="Кадр 1" class="w-full h-full object-cover">
+                            </div>
+                            <p class="handwritten text-2xl text-center text-rose-900 mt-3 font-bold">
+                                Наше начало ✨
+                            </p>
+                        </div>
+                        <div class="polaroid-back">
+                            <span class="text-3xl mb-2">💭</span>
+                            <h3 class="handwritten text-3xl font-bold text-rose-600 mb-2">Тот самый день</h3>
+                            <p class="text-sm text-rose-900/80 leading-relaxed">
+                                Помню, как всё начиналось. С первой минуты понял, что с тобой максимально легко и круто.
+                            </p>
+                            <span class="mt-4 text-xs text-rose-400">(кликни, чтобы вернуть)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Полароид 2 -->
+                <div class="polaroid-flip sm:translate-y-3" onclick="this.classList.toggle('flipped')">
+                    <div class="polaroid-inner">
+                        <div class="polaroid-front">
+                            <div class="w-full h-64 rounded-xl overflow-hidden bg-rose-50">
+                                <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=600&q=80"
+                                     onerror="this.src='https://placehold.co/600x600/ffe4e6/be123c?text=Фото+2'"
+                                     alt="Кадр 2" class="w-full h-full object-cover">
+                            </div>
+                            <p class="handwritten text-2xl text-center text-rose-900 mt-3 font-bold">
+                                Топ вайб 🌅
+                            </p>
+                        </div>
+                        <div class="polaroid-back">
+                            <span class="text-3xl mb-2">✨</span>
+                            <h3 class="handwritten text-3xl font-bold text-rose-600 mb-2">Лучшая прогулка</h3>
+                            <p class="text-sm text-rose-900/80 leading-relaxed">
+                                Обожаю наши разговоры ни о чём и обо всём сразу. Твой смех — мой любимый звук.
+                            </p>
+                            <span class="mt-4 text-xs text-rose-400">(кликни, чтобы вернуть)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Полароид 3 -->
+                <div class="polaroid-flip sm:rotate-2" onclick="this.classList.toggle('flipped')">
+                    <div class="polaroid-inner">
+                        <div class="polaroid-front">
+                            <div class="w-full h-64 rounded-xl overflow-hidden bg-rose-50">
+                                <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=600&q=80"
+                                     onerror="this.src='https://placehold.co/600x600/ffe4e6/be123c?text=Фото+3'"
+                                     alt="Кадр 3" class="w-full h-full object-cover">
+                            </div>
+                            <p class="handwritten text-2xl text-center text-rose-900 mt-3 font-bold">
+                                Просто мы ❤️
+                            </p>
+                        </div>
+                        <div class="polaroid-back">
+                            <span class="text-3xl mb-2">💖</span>
+                            <h3 class="handwritten text-3xl font-bold text-rose-600 mb-2">Дальше — больше</h3>
+                            <p class="text-sm text-rose-900/80 leading-relaxed">
+                                Впереди ещё куча крутых историй, фоток и моментов, которые мы запомним навсегда.
+                            </p>
+                            <span class="mt-4 text-xs text-rose-400">(кликни, чтобы вернуть)</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- =================================================================
+             БЛОК 4: СЕКРЕТНАЯ СКРЕТЧ-КАРТА И ТЕГИ ВАЙБА (БЕЗ КРИНЖА)
+        ================================================================== -->
+        <section class="reveal-block soft-card rounded-3xl p-6 sm:p-10 space-y-8">
+            <div class="text-center">
+                <h2 class="serif-title text-2xl sm:text-4xl font-bold text-rose-950 mb-2">
+                    Секретный слой ✨
+                </h2>
+                <p class="text-xs sm:text-sm text-rose-700/75">
+                    Сотри защитный слой пальцем или мышкой, чтобы увидеть скрытую фразу
+                </p>
+            </div>
+
+            <!-- Стираемая скретч-карточка -->
+            <div class="max-w-lg mx-auto">
+                <div class="scratch-wrapper flex items-center justify-center p-4 text-center">
+                    <!-- ✏️ ИЗМЕНИ СЕКРЕТНУЮ ФРАЗУ ПОД СТИРАШКОЙ -->
+                    <p id="secret-scratch-msg" class="handwritten text-2xl sm:text-3xl font-bold text-rose-600 leading-snug">
+                        Ты — лучшее, что случилось со мной в этом году ❤️
+                    </p>
+                    <canvas id="scratch-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Интерактивные пилюли-теги (нажимаешь — появляется тёплая заметка) -->
+            <div class="pt-4 border-t border-rose-100 text-center space-y-4">
+                <p class="text-xs font-semibold uppercase tracking-wider text-rose-400">
+                    Нажми на любой тег, чтобы открыть мысль:
+                </p>
+                
+                <!-- ✏️ МОЖЕШЬ ПОМЕНЯТЬ НАЗВАНИЯ ТЕГОВ И ТЕКСТЫ В data-note="..." -->
+                <div class="flex flex-wrap justify-center gap-2.5">
+                    <button class="vibe-pill px-4 py-2 rounded-full bg-white border border-rose-200 text-xs sm:text-sm font-medium text-rose-800 hover:bg-rose-500 hover:text-white transition-all cursor-pointer shadow-sm"
+                            data-note="Твоё чувство юмора вытаскивает даже самый скучный день. С тобой нереально круто! 😂✨">
+                        ⚡ Наш вайб
+                    </button>
+                    <button class="vibe-pill px-4 py-2 rounded-full bg-white border border-rose-200 text-xs sm:text-sm font-medium text-rose-800 hover:bg-rose-500 hover:text-white transition-all cursor-pointer shadow-sm"
+                            data-note="Когда ты улыбаешься — у меня сразу поднимается настроение на максимум ☀️">
+                        🌸 Твоя улыбка
+                    </button>
+                    <button class="vibe-pill px-4 py-2 rounded-full bg-white border border-rose-200 text-xs sm:text-sm font-medium text-rose-800 hover:bg-rose-500 hover:text-white transition-all cursor-pointer shadow-sm"
+                            data-note="Спасибо, что всегда поддерживаешь и понимаешь с полуслова. Это бесценно 🤝❤️">
+                        💫 Поддержка
+                    </button>
+                    <button class="vibe-pill px-4 py-2 rounded-full bg-white border border-rose-200 text-xs sm:text-sm font-medium text-rose-800 hover:bg-rose-500 hover:text-white transition-all cursor-pointer shadow-sm"
+                            data-note="Жду нашу следующую встречу больше, чем выход новой игры или каникулы 🔥">
+                        🚀 Встречи
+                    </button>
+                </div>
+
+                <!-- Блок вывода заметки -->
+                <div id="vibe-output" class="min-h-[56px] max-w-md mx-auto flex items-center justify-center px-5 py-3 rounded-2xl bg-rose-50/90 border border-rose-200/70 text-sm sm:text-base text-rose-900 font-medium transition-all">
+                    Выбери любой тег выше 👆
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================================
+             БЛОК 5: ИГРИВЫЙ ФИНАЛ С УБЕГАЮЩЕЙ КНОПКОЙ "НЕТ"
+        ================================================================== -->
+        <section class="reveal-block soft-card rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden">
+            <div class="text-4xl sm:text-5xl mb-3">🥺👉👈</div>
+            <!-- ✏️ ИЗМЕНИ ФИНАЛЬНЫЙ ВОПРОС -->
+            <h2 class="serif-title text-3xl sm:text-5xl font-bold text-rose-950 mb-8">
+                Ты меня любишь?
+            </h2>
+
+            <div class="flex flex-wrap items-center justify-center gap-5 relative min-h-[70px]">
+                <button id="yes-btn" class="px-9 py-4 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-lg sm:text-xl shadow-lg shadow-rose-500/30 hover:scale-105 active:scale-95 transition-all cursor-pointer z-10">
+                    Да, очень! ❤️
+                </button>
+
+                <button id="no-btn" class="px-8 py-4 rounded-2xl bg-white border border-rose-200 text-rose-700 font-semibold text-base sm:text-lg shadow-sm transition-all duration-200 cursor-pointer">
+                    Нет 🙈
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center pb-8 text-xs text-rose-400">
+        Сделано с душой специально для тебя ✨
+    </footer>
+
+
+    <!-- =====================================================================
+         МОДАЛЬНОЕ ОКНО ПРИ НАЖАТИИ НА "ДА"
+    ====================================================================== -->
+    <div id="celebrate-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-rose-950/40 backdrop-blur-sm">
+        <div id="celebrate-card" class="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-2 border-rose-200 shadow-2xl transform scale-95 opacity-0 transition-all duration-300">
+            <div class="text-6xl mb-4 animate-bounce">🥰💖</div>
+            <h3 class="serif-title text-3xl font-bold text-rose-950 mb-3">
+                Я так и знал!
+            </h3>
+            <p class="text-rose-800/80 text-sm sm:text-base leading-relaxed mb-6">
+                И я тебя очень сильно люблю! Спасибо, что ты есть ❤️
+            </p>
+            <button id="close-modal-btn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold hover:opacity-95 transition-all cursor-pointer">
+                Обнять в ответ 🤗
+            </button>
+        </div>
+    </div>
+
+
+    <!-- =====================================================================
+         JAVASCRIPT ЛОГИКА
+    ====================================================================== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // =================================================================
+            // ⚙️ ТВОИ НАСТРОЙКИ (МЕНЯЙ ПОД СЕБЯ ЗДЕСЬ)
+            // =================================================================
+            
+            // ✏️ 1. ДАТА НАЧАЛА ВАШИХ ОТНОШЕНИЙ / ЗНАКОМСТВА (ГГГГ-ММ-ДДTЧЧ:ММ:СС)
+            const START_DATE = new Date('2025-05-14T18:00:00');
+
+            // ✏️ 2. ТЕКСТ ПИСЬМА (будет печататься по буквам после открытия конверта)
+            const LETTER_TEXT = `Привет, солнце! ☀️\n\nЯ решил сделать этот небольшой сайт специально для тебя — чтобы у нас был свой уютный уголок в сети, куда можно зайти в любой момент и улыбнуться.\n\nСпасибо тебе за твой смех, за наши разговоры и за то, что рядом с тобой каждый день становится намного ярче.\n\nЛистай ниже — там я спрятал наши фотки и пару секретов. 😉`;
+
+
+            // =================================================================
+            // 1. КОНВЕРТ И ЭФФЕКТ ПЕЧАТНОЙ МАШИНКИ
+            // =================================================================
+            const openEnvelopeBtn = document.getElementById('open-envelope-btn');
+            const envelope = document.getElementById('envelope');
+            const envelopeArea = document.getElementById('envelope-area');
+            const letterCard = document.getElementById('letter-card');
+            const typewriterBox = document.getElementById('typewriter-box');
+            let alreadyTyped = false;
+
+            function runTypewriter(text, index = 0) {
+                if (index < text.length) {
+                    typewriterBox.textContent += text.charAt(index);
+                    setTimeout(() => runTypewriter(text, index + 1), 26);
+                }
+            }
+
+            openEnvelopeBtn.addEventListener('click', () => {
+                envelope.classList.add('opened');
+                confetti({
+                    particleCount: 55,
+                    spread: 65,
+                    origin: { y: 0.45 },
+                    colors: ['#f43f5e', '#fb7185', '#fda4af', '#fecdd3']
+                });
+
+                setTimeout(() => {
+                    envelopeArea.classList.add('hidden');
+                    letterCard.classList.remove('hidden');
+                    if (!alreadyTyped) {
+                        alreadyTyped = true;
+                        runTypewriter(LETTER_TEXT);
+                    }
+                }, 650);
+            });
+
+
+            // =================================================================
+            // 2. ЖИВОЙ ТАЙМЕР ОТНОШЕНИЙ
+            // =================================================================
+            function updateCounter() {
+                const now = new Date();
+                const diff = now - START_DATE;
+                if (diff < 0) return;
+
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const m = Math.floor((diff / 1000 / 60) % 60);
+                const s = Math.floor((diff / 1000) % 60);
+
+                document.getElementById('days').innerText = d;
+                document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
+                document.getElementById('minutes').innerText = m < 10 ? '0' + m : m;
+                document.getElementById('seconds').innerText = s < 10 ? '0' + s : s;
+            }
+            updateCounter();
+            setInterval(updateCounter, 1000);
+
+
+            // =================================================================
+            // 3. СКРЕТЧ-КАРТА (СТИРАЕМ ПАЛЬЦЕМ ИЛИ МЫШКОЙ)
+            // =================================================================
+            const canvas = document.getElementById('scratch-canvas');
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            let isCleared = false;
+
+            function initScratchCard() {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+
+                // Рисуем красивый пастельно-розовый градиент поверх текста
+                const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                grad.addColorStop(0, '#fda4af');
+                grad.addColorStop(1, '#fb7185');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Надпись-подсказка сверху
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '600 16px "Plus Jakarta Sans", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('✨ Сотри меня ✨', canvas.width / 2, canvas.height / 2);
+            }
+
+            initScratchCard();
+            window.addEventListener('resize', () => {
+                if (!isCleared) initScratchCard();
+            });
+
+            function scratchAt(x, y) {
+                if (isCleared) return;
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, 22, 0, Math.PI * 2);
+                ctx.fill();
+                checkScratchProgress();
+            }
+
+            function checkScratchProgress() {
+                // Проверяем процент стёртого слоя
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                let transparentPixels = 0;
+                for (let i = 3; i < imgData.length; i += 16) {
+                    if (imgData[i] === 0) transparentPixels++;
+                }
+                const totalSampled = imgData.length / 16;
+                if (transparentPixels / totalSampled > 0.45) {
+                    isCleared = true;
+                    canvas.style.opacity = '0';
+                    setTimeout(() => canvas.remove(), 600);
+                    confetti({
+                        particleCount: 50,
+                        spread: 60,
+                        origin: { y: 0.65 },
+                        colors: ['#f43f5e', '#fb7185', '#fda4af']
+                    });
+                }
+            }
+
+            function getCoords(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            canvas.addEventListener('mousedown', (e) => { isDrawing = true; const p = getCoords(e); scratchAt(p.x, p.y); });
+            window.addEventListener('mouseup', () => { isDrawing = false; });
+            canvas.addEventListener('mousemove', (e) => { if (isDrawing) { const p = getCoords(e); scratchAt(p.x, p.y); } });
+
+            canvas.addEventListener('touchstart', (e) => { isDrawing = true; const p = getCoords(e); scratchAt(p.x, p.y); }, { passive: true });
+            canvas.addEventListener('touchend', () => { isDrawing = false; });
+            canvas.addEventListener('touchmove', (e) => { if (isDrawing) { const p = getCoords(e); scratchAt(p.x, p.y); } }, { passive: true });
+
+
+            // =================================================================
+            // 4. ИНТЕРАКТИВНЫЕ ТЕГИ-НАСТРОЕНИЯ
+            // =================================================================
+            const vibePills = document.querySelectorAll('.vibe-pill');
+            const vibeOutput = document.getElementById('vibe-output');
+
+            vibePills.forEach(pill => {
+                pill.addEventListener('click', () => {
+                    vibePills.forEach(p => {
+                        p.classList.remove('bg-rose-500', 'text-white', 'border-rose-500');
+                        p.classList.add('bg-white', 'text-rose-800');
+                    });
+                    pill.classList.remove('bg-white', 'text-rose-800');
+                    pill.classList.add('bg-rose-500', 'text-white', 'border-rose-500');
+
+                    vibeOutput.style.opacity = '0';
+                    setTimeout(() => {
+                        vibeOutput.textContent = pill.getAttribute('data-note');
+                        vibeOutput.style.opacity = '1';
+                    }, 150);
+                });
+            });
+
+
+            // =================================================================
+            // 5. ФИНАЛЬНАЯ ИГРА ("ТЫ МЕНЯ ЛЮБИШЬ?")
+            // =================================================================
+            const noBtn = document.getElementById('no-btn');
+            const yesBtn = document.getElementById('yes-btn');
+            const celebrateModal = document.getElementById('celebrate-modal');
+            const celebrateCard = document.getElementById('celebrate-card');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const funnyTexts = ['Неа 😜', 'Мимо!', 'Не поймаешь!', 'Жми ДА ❤️', 'Почти 😂', 'Ошибка!'];
+
+            function dodgeNoButton(e) {
+                if (e) e.preventDefault();
+                const maxX = Math.min(window.innerWidth - noBtn.offsetWidth - 50, 170);
+                const maxY = 85;
+                const randX = (Math.random() - 0.5) * 2 * maxX;
+                const randY = (Math.random() - 0.5) * 2 * maxY;
+                noBtn.style.transform = `translate(${randX}px, ${randY}px)`;
+                noBtn.innerText = funnyTexts[Math.floor(Math.random() * funnyTexts.length)];
+            }
+
+            noBtn.addEventListener('mouseover', dodgeNoButton);
+            noBtn.addEventListener('touchstart', dodgeNoButton, { passive: false });
+            noBtn.addEventListener('click', dodgeNoButton);
+
+            yesBtn.addEventListener('click', () => {
+                confetti({
+                    particleCount: 110,
+                    spread: 85,
+                    origin: { y: 0.6 },
+                    colors: ['#f43f5e', '#fb7185', '#fda4af', '#fecdd3', '#ffd1dc']
+                });
+                celebrateModal.classList.remove('hidden');
+                celebrateModal.classList.add('flex');
+                setTimeout(() => {
+                    celebrateCard.classList.remove('scale-95', 'opacity-0');
+                    celebrateCard.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            });
+
+            closeModalBtn.addEventListener('click', () => {
+                celebrateCard.classList.remove('scale-100', 'opacity-100');
+                celebrateCard.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    celebrateModal.classList.add('hidden');
+                    celebrateModal.classList.remove('flex');
+                }, 200);
+            });
+
+
+            // =================================================================
+            // 6. ПЛАВНОЕ ПОЯВЛЕНИЕ БЛОКОВ ПРИ СКРОЛЛЕ И ЧАСТИЦЫ
+            // =================================================================
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.12 });
+
+            document.querySelectorAll('.reveal-block').forEach(el => observer.observe(el));
+
+            // Фоновые частицы
+            const ambientBg = document.getElementById('ambient-bg');
+            const icons = ['🌸', '💖', '✨', '💕'];
+            setInterval(() => {
+                const p = document.createElement('div');
+                p.classList.add('ambient-particle');
+                p.innerText = icons[Math.floor(Math.random() * icons.length)];
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.fontSize = (Math.random() * 12 + 12) + 'px';
+                const dur = Math.random() * 7 + 9;
+                p.style.animationDuration = dur + 's';
+                ambientBg.appendChild(p);
+                setTimeout(() => p.remove(), dur * 1000);
+            }, 1100);
+
+            // Шлейф за курсором
+            let lastSpark = 0;
+            function addSparkle(x, y) {
+                const now = Date.now();
+                if (now - lastSpark < 80) return;
+                lastSpark = now;
+                const s = document.createElement('div');
+                s.classList.add('cursor-sparkle');
+                s.innerText = Math.random() > 0.5 ? '✨' : '🌸';
+                s.style.left = x + 'px';
+                s.style.top = y + 'px';
+                document.body.appendChild(s);
+                setTimeout(() => s.remove(), 900);
+            }
+            window.addEventListener('mousemove', (e) => addSparkle(e.clientX, e.clientY));
+            window.addEventListener('touchmove', (e) => {
+                if (e.touches[0]) addSparkle(e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: true });
+
+
+            // =================================================================
+            // 7. ЛЁГКАЯ МУЗЫКАЛЬНАЯ ШКАТУЛКА
+            // =================================================================
+            const musicBtn = document.getElementById('music-btn');
+            const musicIcon = document.getElementById('music-icon');
+            const musicText = document.getElementById('music-text');
+            let audioCtx = null;
+            let playing = false;
+            let timerId = null;
+            const scale = [523.25, 659.25, 783.99, 987.77, 1046.50, 987.77, 783.99, 659.25];
+            let step = 0;
+
+            function playSoftNote() {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(scale[step], audioCtx.currentTime);
+                step = (step + 1) % scale.length;
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.3);
+            }
+
+            musicBtn.addEventListener('click', () => {
+                const customTrack = document.getElementById('custom-track');
+                playing = !playing;
+                if (playing) {
+                    musicIcon.innerText = '🎵';
+                    musicText.innerText = 'Играет';
+                    if (customTrack) customTrack.play();
+                    else { playSoftNote(); timerId = setInterval(playSoftNote, 850); }
+                } else {
+                    musicIcon.innerText = '🔇';
+                    musicText.innerText = 'Включить вайб';
+                    if (customTrack) customTrack.pause();
+                    else clearInterval(timerId);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
